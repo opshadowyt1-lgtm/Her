@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A glimpse of us, more like her.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lora:wght@400;500&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: #fff5f7;
+      overflow-x: hidden;
+      color: #7a3d52;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Phases ─────────────────────────────────────────── */
+    .phase { display: none; }
+    .phase.active { display: flex; }
+
+    /* ── Floating hearts ────────────────────────────────── */
+    @keyframes floatHeart {
+      0%   { transform: translateY(0) scale(1) rotate(-10deg); opacity: 0; }
+      10%  { opacity: 1; }
+      80%  { opacity: .6; }
+      100% { transform: translateY(-110vh) scale(.6) rotate(15deg); opacity: 0; }
+    }
+    @keyframes drift {
+      0%,100% { margin-left: 0; }
+      50%      { margin-left: 18px; }
+    }
+    .floating-heart {
+      position: absolute;
+      bottom: -20px;
+      pointer-events: none;
+      user-select: none;
+      animation: floatHeart linear infinite, drift ease-in-out infinite;
+      filter: drop-shadow(0 0 6px rgba(255,105,135,.7));
+      color: rgba(255,105,140,.75);
+    }
+
+    /* ── Lily sway ───────────────────────────────────────── */
+    @keyframes sway {
+      0%,100% { transform: rotate(-3deg) scale(1); }
+      50%      { transform: rotate(4deg) scale(1.02); }
+    }
+    .lily-decor {
+      position: absolute;
+      pointer-events: none;
+      user-select: none;
+      animation: sway 4s ease-in-out infinite;
+    }
+
+    /* ── Popup ───────────────────────────────────────────── */
+    @keyframes popIn {
+      0%   { transform: scale(.7) translateY(20px); opacity: 0; }
+      70%  { transform: scale(1.04) translateY(-3px); opacity: 1; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    @keyframes fadeBloom {
+      0%   { opacity: 0; transform: scale(.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes heartBeat {
+      0%,100% { transform: scale(1); }
+      25%      { transform: scale(1.18); }
+      50%      { transform: scale(1); }
+      75%      { transform: scale(1.10); }
+    }
+    .popup-card    { animation: popIn .7s cubic-bezier(.34,1.56,.64,1) forwards; }
+    .popup-heart   { animation: heartBeat 1.6s ease-in-out infinite; display: inline-block; }
+    .mini-heart-fx { animation: fadeBloom 1.4s ease forwards; }
+
+    /* ── Page transitions ────────────────────────────────── */
+    @keyframes pageRight {
+      0%   { opacity: 0; transform: translateX(60px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes pageLeft {
+      0%   { opacity: 0; transform: translateX(-60px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+    .page-enter-right { animation: pageRight .4s ease forwards; }
+    .page-enter-left  { animation: pageLeft  .4s ease forwards; }
+
+    /* ── Read button ─────────────────────────────────────── */
+    .read-btn {
+      background: linear-gradient(135deg, #ffb6c1 0%, #ff8fa3 60%, #ff6b8a 100%);
+      box-shadow: 0 0 12px rgba(255,110,140,.5), 0 4px 20px rgba(255,80,120,.3),
+                  inset 0 1px 0 rgba(255,255,255,.4);
+      transition: all .3s ease;
+      border: none;
+      border-radius: 50px;
+      color: #fff;
+      cursor: pointer;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1rem,3.5vw,1.15rem);
+      font-weight: 400;
+      letter-spacing: .06em;
+      padding: .75rem 2.8rem;
+    }
+    .read-btn:hover  { box-shadow: 0 0 20px rgba(255,110,140,.8), 0 6px 28px rgba(255,80,120,.5), inset 0 1px 0 rgba(255,255,255,.5); transform: translateY(-2px) scale(1.02); }
+    .read-btn:active { transform: translateY(0) scale(.98); }
+
+    /* ── Photo slot ──────────────────────────────────────── */
+    .photo-slot {
+      width: 100%;
+      aspect-ratio: 3/4;
+      max-height: 340px;
+      border-radius: 1.4rem;
+      border: 2px dashed #ffb6c5;
+      background: linear-gradient(135deg,#fff0f3,#ffe4ec);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all .3s ease;
+    }
+    .photo-slot:hover { border-color: #ff8fa3; background: linear-gradient(135deg,#ffe8ef,#ffd6e0); }
+    .photo-slot img   { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 1.3rem; }
+    .photo-slot-hint  { display: flex; flex-direction: column; align-items: center; gap: .5rem; opacity: .45; transition: opacity .25s; pointer-events: none; }
+    .photo-slot:hover .photo-slot-hint { opacity: .75; }
+    .photo-slot-hint span:first-child { font-size: 1.8rem; }
+    .photo-slot-hint span:last-child  { font-size: .6rem; color: #c47085; font-family: 'Lora',serif; letter-spacing: .12em; text-transform: uppercase; }
+
+    /* ── Book ────────────────────────────────────────────── */
+    .book-border {
+      background: linear-gradient(145deg,#fff8fa,#fff0f4);
+      border: 2px solid #ffd6e0;
+      box-shadow: 0 8px 40px rgba(255,100,140,.12), 0 2px 8px rgba(255,150,175,.18),
+                  inset 0 1px 0 rgba(255,255,255,.8);
+    }
+
+    /* ── Sticker ─────────────────────────────────────────── */
+    .sticker-item {
+      position: absolute;
+      cursor: grab;
+      user-select: none;
+      line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(200,80,120,.2));
+      font-size: clamp(1.3rem,4vw,2rem);
+      transition: transform .15s ease;
+    }
+    .sticker-item:hover { transform: translate(-50%,-50%) scale(1.12) rotate(-5deg) !important; z-index: 10; }
+    .sticker-item.dragging { cursor: grabbing; z-index: 20; }
+
+    /* ── Shimmer ─────────────────────────────────────────── */
+    @keyframes shimmer { 0%,100%{opacity:.5} 50%{opacity:1} }
+    .shimmer { animation: shimmer 2.5s ease-in-out infinite; }
+
+    /* ── Nav button ──────────────────────────────────────── */
+    .nav-btn {
+      background: rgba(255,182,195,.55);
+      border: 1.5px solid rgba(255,155,175,.4);
+      border-radius: 50px;
+      padding: .55rem 1.4rem;
+      cursor: pointer;
+      font-family: 'Playfair Display', serif;
+      font-size: .85rem;
+      color: #b5485e;
+      transition: all .25s;
+    }
+    .nav-btn:hover    { background: rgba(255,182,195,.75); }
+    .nav-btn:disabled { background: rgba(255,182,195,.2); color: #d4a4b0; cursor: not-allowed; }
+
+    /* ── Sticker picker ──────────────────────────────────── */
+    .sticker-picker {
+      display: none;
+      background: rgba(255,252,254,.96);
+      border: 1.5px solid #ffd0de;
+      border-radius: 1.2rem;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 8px 32px rgba(255,100,140,.12);
+      animation: fadeBloom .25s ease forwards;
+    }
+    .sticker-picker.open { display: block; }
+    .sticker-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(2.6rem,1fr));
+      gap: .3rem;
+    }
+    .sticker-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: .6rem;
+      padding: .3rem;
+      cursor: pointer;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+    }
+    .sticker-btn:hover { background: rgba(255,182,195,.35); }
+
+    /* ── Progress dot ────────────────────────────────────── */
+    .prog-dot {
+      height: .4rem;
+      border-radius: 50px;
+      background: rgba(232,143,171,.3);
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: all .3s ease;
+      width: .4rem;
+    }
+    .prog-dot.active { background: #e88fab; width: 1.4rem; }
+
+    /* ── Placing-hint banner ─────────────────────────────── */
+    #placing-hint {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,240,245,.95);
+      border: 1.5px solid #ffb6c5;
+      border-radius: 50px;
+      padding: .4rem 1.2rem;
+      font-family: 'Lora',serif;
+      font-size: .72rem;
+      color: #c45c7a;
+      letter-spacing: .08em;
+      z-index: 50;
+      box-shadow: 0 4px 16px rgba(255,100,140,.15);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+<audio id="bg-audio" src="YOUR_SONG_FILE.mp3" loop preload="auto" style="display:none"></audio>
+
+<div id="placing-hint"></div>
+
+<div id="phase-cover" class="phase active" style="
+  min-height:100dvh; width:100%; position:relative;
+  flex-direction:column; align-items:center; justify-content:center;
+  background:linear-gradient(160deg,#fff5f7 0%,#ffe9ef 40%,#fff0f5 100%);
+  overflow:hidden; padding:2rem 1.5rem 3rem;">
+
+  <div id="cover-hearts" aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;"></div>
+
+  <div class="lily-decor" style="left:2%;bottom:10%;width:68px;opacity:.4;animation-delay:0s"></div>
+  <div class="lily-decor" style="right:2%;bottom:7%;width:52px;opacity:.33;animation-delay:1.2s"></div>
+  <div class="lily-decor" style="left:6%;top:8%;width:38px;opacity:.24;animation-delay:2.4s"></div>
+  <div class="lily-decor" style="right:6%;top:12%;width:42px;opacity:.26;animation-delay:.8s"></div>
+
+  <div style="position:relative;z-index:1;max-width:380px;width:100%;display:flex;flex-direction:column;align-items:center;gap:2rem;">
+    <div style="text-align:center;">
+      <p style="font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(.6rem,2vw,.72rem);color:#e08fa0;letter-spacing:.28em;margin-bottom:.8rem;opacity:.6;font-weight:400;">♡ ♡ ♡</p>
+      <h1 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(1.7rem,6vw,2.6rem);font-weight:300;color:#b5485e;line-height:1.4;letter-spacing:.06em;margin:0;opacity:.9;">
+        A glimpse of us,<br>
+        <span style="font-weight:400;font-size:.88em;color:#c47085;letter-spacing:.08em;">more like her.</span>
+      </h1>
+    </div>
+
+    <div id="cover-photo-wrap" class="photo-slot" onclick="document.getElementById('photo-input').click()">
+      <input id="photo-input" type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)" />
+      <div class="photo-slot-hint">
+        <span>📷</span>
+        <span>her photo</span>
+      </div>
+    </div>
+
+    <button class="read-btn" onclick="handleRead()">Read ♡</button>
+  </div>
+</div>
+
+<div id="phase-popup" class="phase" style="
+  position:fixed;inset:0;z-index:100;
+  align-items:center;justify-content:center;
+  background:rgba(255,234,240,.9);backdrop-filter:blur(16px);
+  transition:opacity .7s ease;">
+
+  <div id="popup-hearts" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
+
+  <div class="popup-card" style="
+    display:flex;flex-direction:column;align-items:center;gap:1.1rem;
+    padding:2.8rem 3.2rem 2.4rem;border-radius:2rem;
+    background:rgba(255,252,254,.94);
+    box-shadow:0 8px 48px rgba(255,100,140,.15),0 2px 12px rgba(255,150,170,.18),inset 0 1px 0 rgba(255,255,255,.9);
+    border:1.5px solid rgba(255,182,195,.5);
+    max-width:min(400px,88vw);text-align:center;position:relative;z-index:2;">
+
+    <p style="font-family:'Cormorant Garamond','Playfair Display',Georgia,serif;font-size:clamp(1.5rem,5.5vw,2rem);font-weight:300;color:#b5485e;line-height:1.3;margin:0;letter-spacing:.06em;">I love you</p>
+    <span class="popup-heart" aria-hidden="true" style="font-size:1rem;color:#e88fab;filter:drop-shadow(0 0 6px rgba(232,143,171,.8));line-height:1;">♥</span>
+    <p style="font-family:'Cormorant Garamond','Playfair Display',Georgia,serif;font-size:clamp(.85rem,3vw,1.05rem);font-weight:400;color:#c47085;margin:0;letter-spacing:.12em;opacity:.85;">for you dori.</p>
+  </div>
+</div>
+
+<div id="phase-book" class="phase" style="
+  min-height:100dvh;width:100%;
+  background:linear-gradient(160deg,#fff5f7 0%,#ffe9ef 40%,#fff0f5 100%);
+  flex-direction:column;align-items:center;justify-content:center;
+  padding:1.5rem 1rem 2rem;position:relative;overflow:hidden;">
+
+  <div id="book-hearts" aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;"></div>
+
+  <div style="position:relative;z-index:1;width:100%;max-width:720px;display:flex;flex-direction:column;gap:1.2rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding-inline:.25rem;">
+      <p style="font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(.8rem,2.5vw,1rem);color:#c47085;margin:0;opacity:.75;">♡ for you</p>
+      <span id="page-counter" style="font-family:'Lora',serif;font-size:.68rem;color:#d4889a;letter-spacing:.12em;">1 / 1</span>
+    </div>
+
+    <div id="book-card" class="book-border" style="border-radius:1.5rem;padding:clamp(1.4rem,4vw,2.4rem) clamp(1.2rem,4vw,2.8rem);min-height:clamp(420px,65vh,680px);position:relative;overflow:hidden;cursor:default;">
+      <span aria-hidden="true" style="position:absolute;top:12px;left:14px;font-size:.85rem;opacity:.3;color:#e88fab;pointer-events:none;">♡</span>
+      <span aria-hidden="true" style="position:absolute;top:12px;right:14px;font-size:.85rem;opacity:.3;color:#e88fab;pointer-events:none;">♡</span>
+      <span aria-hidden="true" style="position:absolute;bottom:12px;left:14px;font-size:.85rem;opacity:.3;color:#e88fab;pointer-events:none;">♡</span>
+      <span aria-hidden="true" style="position:absolute;bottom:12px;right:14px;font-size:.85rem;opacity:.3;color:#e88fab;pointer-events:none;">♡</span>
+
+      <div id="page-content" style="position:relative;z-index:1;"></div>
+      <div id="sticker-layer" style="position:absolute;inset:0;pointer-events:none;"></div>
+
+      <div aria-hidden="true" style="position:absolute;bottom:.8rem;left:50%;transform:translateX(-50%);display:flex;gap:.3rem;opacity:.22;pointer-events:none;">
+        <span style="font-size:.65rem;color:#e88fab;">♡</span>
+        <span style="font-size:.65rem;color:#e88fab;">♡</span>
+        <span style="font-size:.65rem;color:#e88fab;">♡</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:center;gap:1.2rem;">
+      <button id="btn-prev" class="nav-btn" onclick="goPage(-1)">← back</button>
+      <button id="btn-sticker" onclick="togglePicker()" style="background:rgba(255,220,230,.5);border:1.5px solid rgba(255,155,175,.45);border-radius:50px;padding:.55rem 1rem;cursor:pointer;font-size:1.1rem;transition:all .25s;" title="Add sticker">🌸</button>
+      <button id="btn-next" class="nav-btn" onclick="goPage(1)">next →</button>
+    </div>
+
+    <div id="sticker-picker" class="sticker-picker">
+      <p style="font-family:'Lora',serif;font-size:.6rem;color:#d4889a;letter-spacing:.18em;text-transform:uppercase;margin:0 0 .65rem;text-align:center;">pick a sticker · tap to place</p>
+      <div id="sticker-grid" class="sticker-grid"></div>
+      <p style="font-family:'Lora',serif;font-size:.58rem;color:#d4a4b0;margin:.65rem 0 0;text-align:center;opacity:.7;">drag stickers to move them · right-click to remove</p>
+    </div>
+
+    <div id="progress-dots" style="display:flex;justify-content:center;gap:.35rem;flex-wrap:wrap;"></div>
+  </div>
+</div>
+
+<script>
+/* ── Configuration Settings ─────────────────────────────────── */
+const CHARS_PER_PAGE = 550; // Sets reasonable text breaks for pages
+
+/* ── Love Letter Text ────────────────────────────────────────── */
+const LOVE_LETTER = `this is for you my love, did you think that I was joking? about this? about our love? mwuahajahahahahahahahaahhahaajahahahshsgsgsgshshahshsgshahahajajajajajajaajajajajajajajhajahhaa you're so dummy I would never lie about love. I love you and I obviously wouldn't want to let my baby think she's useless so uhmmmmm.
+This is for you baby, a mini book I wanted to write for you. 
+By the time you are up I might be in a coma or dead because I am going to write it in one sitting no matter how long it is going to take me. (Update - I am dying it's 6:38am and its been 3 hours I'm only on reason 22
+Second update- I fell asleep it's 1:38pm...I'm only on reason 26...
+Third update- it's over for me I think I'm done writing soon it's 7:48pm rn because I don't want to leave you alone for long anymore
+Fourth update- I'm done writting it's 8:01pm and it's about 47k letters combining the website coding I love you sweetie I wanted to write 100k but I don't want you to wait for so long)
+
+
+It's for you my dori 🤭 
+Read it when you are back from school because it'll take you an hour or something sweetheart my cute little mouse. Kochanie cię tak bardzo mój żona.
+
+You're worth every bit of effort baby don't forget. It's never too much, you deserve the entirety of the universe and even beyond that. Far from what I can ever explain, sweetheart.
+
+The day we met.
+The day and the time was-
+May 30, 2026,  3:23:57 PM.
+It's the time I'll never forget, it was the one of the best time of my life,
+The year, The month, The day, the hour, the minute and the seconds. It's embedded onto my mind.
+
+
+My words fall short. 
+If that day you choosed to sleep, or to not use phone, or the watched tv.
+We would never have met. 
+Things wouldn't be the way they were, or would they?
+Was it fate that brang us together?
+or was it the random?
+or was it the consequences of everything we did in past? 
+Or are we tied by the red strings, people talk about?
+The invisible red strings tied around pinky fingers.
+They say,
+The traditional Chinese red string is a symbol of an invisible, unbreakable connection between two people destined to be together. 
+It will stretch, it will be weaken,
+It'll get tangled, it'll get thinner
+but it will never break. 
+It says that two people connected by the red strings will eventually find there way to eachother.
+No matter how late, how early, no matter how far apart they are, even with thousands of miles of land and seas between them or how long they are separated from eachother they'll find eachother.
+People who are connected from the red strings are written in the stars. A bond that can't be avoided and i know we are bound to be together, I can't see the red strings but I can feel it, feel my connection to your soul. 
+So again, is it fate? or is it the consequences of the past? Or is it the sweet fruit of wait and patience? Or is this this red string that ties is together?..
+Whatever is it, I'm glad it is the way it is.
+
+30th may.
+It was second best day of my life.
+
+However, 
+
+The third best day was the day we got married.
+May 31, 2026, at 9:09:09 PM.
+
+The day we got married.
+Isn't it funny how similar our soul felt the day we met. How similar we were.
+The way we both fitted like a puzzle to a last missing piece. I was the puzzle and you were the missing piece I've been waiting for my entire life.
+
+How beautifully were we written together in the destiny that our souls knew it before we ever did?.. 
+
+In physics there's an phenomenon called quantum entanglement.
+
+By the definition it's-
+"Quantum entanglement where two or more particles become deeply interconnected, sharing a single physical state regardless of the distance between them. When you measure a property of one particle, the other instantly changes its state to match, even if they are on opposite sides of the universe".
+
+My heart and mind speaks every molecule of my body is tangled to yours. 
+In ways physics can't explain.
+My mind is so stiched and entangled to yours I know what your mind speaks before you even say. 
+My heart is so entangled to yours I know what you feel even if you try to hide.
+My body is so attached to you in ways I can't explain, it's almost like I am you and you're me just in different bodies. 
+Almost like how my soul is entangled and tied with yours. 
+and this. this is not a physics phenomenon. 
+it's beyond physics and understanding and maybe, this is love. our love.
+
+Perhaps that may be why, our soul merged before we even knew, maybe on the day we met? 
+
+Or maybe the moment i saw you. 
+
+Not the beauty you hold, but the eyes you have. 
+they say the eyes is windows to your soul, and that may be why the moment I looked into your eyes,
+I fell into the abyss of your ethereal soul from where I'd never want to get of out of.
+The familiarity of it almost like mine,
+the only difference was the warmth and the feeling of home—that i know if i ever try to get out it'll be—gone.
+and for that, I must keep on falling.
+onto the abyss of your soul, of your eyes.
+
+It was full blue moon. The day we married eachother.
+Not officially but in our heads. That's all that matters.
+
+It was blue moon.
+By the definition it represents 
+
+"A Blue Full Moon in the language of love represents a rare, once-in-a-lifetime cosmic alignment between two souls. Because a Blue Moon is a real but highly unusual event—occurring when a single calendar month features two full moons—it serves as the ultimate cosmic metaphor for a love that defies the odds."
+
+it was our soul that aligned that day.
+The day we married, for marriage is merging of our soul my love. It wasn't just a day it was a start.
+
+They say, 
+The blue moon are cosmic mirrors, reflecting light into the deepest, darkest corners of the earth. A Blue Moon represents a moment of absolute emotional clarity.
+Full blue moon governs the ocean tides, pulling the water toward the sky. A Blue Moon represents a period of overwhelming, tidal emotional depth. It is the metaphor for a love that is not calm or casual, but rather a fierce, electric connection that pulls at your instincts and heightens your passion, making it impossible to ignore.
+
+such as our love, too impossible to ignore, to strong to be shaken by any fights.
+Our love combined isn't like the others it's not casual it's absolute soul devotion, it's fierce, for it's real.
+
+just like they said it reaches the darkest parts of earth to light it.
+You were the moon light that day and I was the earth. On that day I knew to tell you things I never did to others because you were the light when I was consumed with darkness.
+That's why ever since the bluemoon you've been my light and only light and I knew it surely that day it is going to be you, and only you, my love.
+
+You are the light. I am just merely a reflection of you.
+You're the moon and I'm the tide.
+You're the sun and I'm the moon.
+You're the clouds and I'm the rain.
+You're you and I'm just a part of you.
+I'm a part of myself and you're fully me.
+For i am nothing without you and everything with you.
+
+I came to think you'll be a part of my life,
+I was mistaken you're my life and I'm merely just a part of it. 
+
+First was the day you officially became mine.
+The date and the time was
+June 2, at 11:14 am.
+the moment I proposed to you it was 11:11 am
+Unintentionally, beautifully. 
+I love the gap of those 3 mins.
+As if it was the time itself revising the days to before you officially became mine.
+30,31,1. That too, coincidentally.
+The moment I sent you the text it was 11:11, it wasn't planned it was random, or was it? 
+or was it fate?
+
+Google says,
+"11:11 represents spiritual alignment, new beginnings, and the manifestation of a soulmate or twin flame connection. Seeing this number indicates that your romantic energy is perfectly synchronized with the universe, signaling that a deep, life-altering love is either entering your life or evolving into a higher spiritual phase".
+
+and I believe every bit of it is true.
+my words fall short for how familiar I feel with you. It was a new beginning for us. You're my soulmate. 
+It's perfectly synchronised with the universe it says, I disagree.
+The universe is perfectly synchronised with you—your heart, for you're not just the universe, you're entirety for whole existence.
+The universe is your heartbeat and I'm the fool who mistakes it as cosmic signs. 
+
+I love you truly and dearly and will do forever.
+
+I love you unconditionally but if I were to tell you few things that I love about you it would be-
+
+
+1. Your eyes, when I look at them baby i just don't see your eyes, I see the emotions, I see the innocence I see a sweet girl my sweet girl, not just that I see the love in your eyes. I love you. 
+2. Your voice, when I heard it for the first time I knew it'll be my favourite sound ever, it was like a song, a melody, that I'd listen to forever for it calmed my soul, it was a blessing to my ears it was so beautiful the way you speak I just fall and fall for you so much. I love you.
+3. Your accent, I love the way you talk I've never heard anyone talk like that, and trust me I love it so much I adore it, I adore you. i love you.
+4. Your little smile, I haven't seen you smile but there was a pic you sent where I knew you were trying not to smile and gosh it has my heart it was so cute I could look at it forever I want to see you smile fully sweetheart. I love you 
+5. Your iris, when I look at it, oh gosh. The way your iris holds the brown, and grey and gosh the green in it makes me wonder how will I'll be able to handle it when I see it irl. I love you 
+6. Your little hands, gosh everytime you send a pic and I see your hands my heart melts just to even think that I'll get to hold them forever one day they're absolutely adorable tiny little mouse you are. I love you 
+7. Your lips, oh they are so uhjeeeermmm I want to kiss them so much all the time 24/7 they're so ughhh perfect so scrumptious mwuahajahahahahahahahahaahahahaha you'll see how much I'll kiss them when I meet youu 3jsusjwmwkw. I love you
+8. Your eyelashes, they're so beautiful absolutely amazing it was as if you're made with every perfect piece there is gosh baby I'm so in love with you and with every little feature even the way how your lashes are so big in middle then go little little gosh that's so beautiful the transition. I love you
+9. Your eyebrows, they're just so perfect you know it was once of the first thing I noticed about you after eyes and gosh they're beautiful far more than I could ever say. I love you 
+10. Your shoulders uhjeeeermmm do I even need to say anything? Those hair heart you made I was looking at your shoulders with my left eye and hair with right bsahajajajaj not my fault you're just so beautiful in every way. I love you 
+11. Your hair, they're absolutely angelic, they're actually godly oh gosh you're so absolutely breathtaking the way your hair folds and fall on your face gosh and the way they made those heart oh my goodness my heart is all yours do you want to take my veins and everything else too or what.. I love you
+12. Your nose, I want to eat it that's it gosh it's so perfect oh my I want to eat it all day yes I love it so much it's so perfect holy goddess i have as my wife it is absolutely unbelievable. I love you
+13. Your skin, it's so AMAZING oh my you're too beautiful in every way, I wonder how soft it is and how it'll feel when I'll get to kiss those cheeks, it's unbelievable even the thought of it makes my heart flustered. I love you
+14. Your chin, it is so underrated oh my it's so adorable one of the most adorable part of you, I mean every part of you is adorable my baby. I love it so much I love you.
+15. Your soft gaze, everytime i look at the way you look at the camera, I feel like you're looking at me it's so beautiful I feel like I'm so safe with you ik I said it before but gosh the way you look at me is filled with so much love I can't explain I adore it. I adore you, I love you.
+16. I love your thighs uhjjemmmmmmmshhhhhahhhh the more I'll talk about it the more I'm gonna get distracted writing th- uhjeeeermmm no words other than crush me with those. PLEASE nxhsusuahahahjahhaja. I love you
+17. I love your feets and i hate that my mortal enemy gets your feet on her face but I can't, hmph i absolutely love it your feet only belongs to mine. Do you understand missy wissy? They're my breakfast uhjjemmmmmmmshhhhhahhhh and dinner too. I love it and I love you.
+18. I love your waist uhjeeeermmm goddamn it's just absolutely art I have no other ways to say it I just want my hands around them nmwuajahaaja ugh I hate I have to wait for so long. I love you 
+19. I love your arms oh yeah uhjjemmmmmmmshhhhhahhhh they're not stronger than mine tho mwauhsjs I'll beat your ass if you don't behave. I want them to be wrapped around my arms when we walk and when home then I want both around my neck like you're hanging on me like cute I want us to be so childish with ughh. I love you 
+20. I love the way your whole body is, I absolutely adore it, it's so hot and cute, I don't have the words to explain how beautiful it is gosh. I love it it's perfect absolutely it has no flaws gosh I'm so attracted to you in every way of I could tell you when you feel not enough or think bad of your body baby know it is so perfect I am not disgusted by any part of your body in any way you can literally rub it all over my tongue I wouldn't mind it.. I love you
+21. The way you understand me, I've never felt so much understood then I did with you. I never thought I'll have someone in my life who will understand me as much as you do. you don't just understand me you heal me, you heal my soul, my heart, my broken self, you picked up broken pieces of me and put them all together with love and such care in a short time of 15 days which I couldn't do for months no matter what and how much I tried, my heart was aching because I didn't had you in my life now that I do everything feels so right, so perfect. Just like you, you're perfect. I love you 
+22. The way you accept me as I am, to think someone will deal with my insane jealousy issues is beyond my understanding, how can a soul like yours exist, too pure, too sweet, and way too innocent. I love the way you understand me and think of me no matter what, and I do too I accept you as who you are my love, you don't understand how much you mean to me, your existence is a blessing to me I would not be able to repay it at any cost my love. You're too valuable, you're everything to me. I love you so much more than you'll ever know. I love you
+23. The way you love me, you love me in ways that I never thought I deserved, you love me in ways that I didn't knew existed, you love me in the ways I never thought I needed, you love me so well so good so dearly I can't explain it i can't explain the feeling of how good I feel when I'm with you, rest of the world stops and you are the only thing that I care about, everything stops when I look at you, my heart skipped a beat when you said I love you for the first time I remember it well, too well. The feeling the emotions everything I can never explain. You love me so well, more than what I deserve. You're the soul reason of my existence, I was meant to love you and you were meant to love me..you love me well don't say that your Love isn't enough it is, it's enough, more than enough. I love you my angel. I love you
+24. The way you adore my imperfections when I said I was too jealous, i was too sensitive you didn't got the ick, you loved me, you choosed to love me despite my personality, despite me being overly jealous even with small things, I never knew you were the someone waiting for me, waiting to love my imperfections and flaws so well. You do so much without even realising, you didn't think I'm childish or annoying or weird or controlling when jealousy took over, or when I cried over how much I love you, you let it happened, you waited, reassured me, cared about it, didn't make fun of me baby you deserve the entirety of the love there is to, I'll try to give it all because I do not know how and when to stop, and because you deserve it too my love. I love you
+25. The way you get sassy, I love it when you're sassy I mean it's just so cute I want to baby you so much when you're sassy it's so cute how you talk when you're sassy and when you act uhhhiyukhgtyyikhhiyf uu it's so cuteeeeeee awwwwww my red tomato gets sassy awwwww princess you're my sassy princess. Never think you're annoying or stupid or dumb always be who you are and love me baby that's all that matters and no you're not dumb you're not stupid you're not annoying you're perfect, you're adorable, you're a baby, my baby my little dori and I love you beyond the words I ever speak. The way you say hmph sometimes is so cute not all the time but sometimes you say it and GOSH it's one of the cutest thing about you, you're absolutely adorable in every way, too captivating sweetheart. I love you
+26. I love how you reassure me, even with little thoughts of me being upset or jealous you make me talk about it, no matter how much I try to hide it but you always, always make me say it, I feel so seen by you I feel so much love when you reassure me and make me tell you things even if it's small, I love how you care about me and my small problems that bothers me, the way you care, reassure and make sure I am not sad only then you breathe a sign of relief I'm too emotional these days I don't know why it maybe because I love you so much I don't know how to deal with my overwhelming love for you muwuahahahahahah, you've done so much for me more than I could ever explain you're so beautiful in every ways it's just wow gosh I can't even tell you, if I've been given one word I would say you're just perfect, you're my cute little Mrs perfect. I love how you're just everything I ever wanted in my life even things I didn't knew I was lacking. I love you
+27. I love the way we make things our not just mine and yours, i love how we have things like ours songs, our fav tree, our mom not just yours or mine, I love it so much how common we are, we are not different we're just a part of eachother that we both have been missing ever since the birth. I love how common we are, I love the way we say same things at same time sometimes and i love how we both are so shy and gosh dummy we both are a dumbass who even gets this close in 16 days nawuuaajkaajahahahaahshsshshdhxxh  well we aren't other people are we? I love the way we feel so connected, I might not be next to you but my heart is close to yours, close your eyes you'll feel me thinking about you no matter the time and the distance baby, don't say we are different we feel things differently and we think about it in a different way because of how we were raised but even with the thousands of miles between us, different time zones, different cultures and the languages we both still feel like the missing piece of eachother and if that isn't love and I don't know what is, it's beautiful absolutely it's heaven to me, we aren't different we're same baby, only if I could explain how home you are to me, I could give up forever to hold you in my arms. I love you
+28. I love how we fight, we fight yes we did and it's normal but the way we handle it is so beautiful, it's just wow. The way we fight, argue we always make it up, no matter how sad or mad we both know how to get past this situation, the way you listen to my words and i explain to you, what's right and what's wrong and so cute it is when you tell me when I'm missing something, I'm never wrong muwahahahahahahahahahaah jk jkk but I find it so beautiful that we never put our ego, anger over this relationship, yes we did make mistakes in past and we did say wrong words and we talked in tones which we shouldn't and I know it is wrong but we fought so we could learn, so we can grow, so we can hold eachother closely, tightly to eachother and learn to never let go off eachother. It's not arguements it's lessons and us understanding eachother deeply than we do normally, we do make mistake but it doesn't matter as long as we are willing to learn and willing to grow along eachother sweetheart and that is what love is, love comes in every way even in arguements even when we are upset with eachother it's love, love isn't just one emotion it's every emotions sweetheart it'll make you feel sad, joy, confused, mad but at the end you'll know it's love disguised in those emotions. I love you
+29. I love the way you listen. I adore the way you listen to my dumb words, to my voice notes, to my violin and to my guitar, I love the way you get happy when you hear me, I love how you listen to me when you have to, I love how you understand me and listen when we are in hard times, I love how you let me tap about anything without saying anything. I'm not much of a yapper but with you I am, I don't know why maybe I just want to talk, because I know your ass doesn't yap all the time it should tho because I want to listen to you, to your childish words, to your inner world, I want you to talk about your hobbies and I want to learn the way you talk, the way you speak I love it it's so dear to me I could recognised it from far away even in a crowded room I know where you'll be, I love how we listen to the songs gosh, listening to our fav song. I don't deserve you you're just perfect hihihihihiihihhihihiihihhi that dayyyyyy remember? Baby I'm so in love with you even thousands of words and even if I write hundreds of book it'll fall less under your beauty and my love. I don't deserve this you look perfect, you are perfect. You're everything to me I love the way you listen, I'll do the same sweetheart anytime. I love you 
+30. I love the way you make me feel safe, I love the way you make me feel like home, I adore the way I feel so safe with you, I want to be in your arms. No one ever has made me this comfortable this much in love. I could never open up much but when you came in my life, gosh it felt like you're just, I mean we're just meant to be together. Not just for now but forever, when I told you about my problems you understood me you made me feel everything is fine, you made everything right the moment I told you about it, you didn't criticize me, you didn't talk bad about me you didn't, you made me melt everytime you reassured me, to think an angel like you was waiting for me, I could never believe it. You're straight out of my dreams, even far from that for i could never dream perfectly of you because my mind can't comprehend the perfection you hold, it's too flawless to imagine your perfect sweetheart, i miss you and I love you more than you'll ever know and I'm glad that I met you, you complete me. You're the start and the end of me, without you i would've been in that void it was hell, then I met you. You turned it all around. You turned the void into home by your warmth, your kindness, your innocence and your love. I love you 
+31. I love the look of innocence you have, the way your eyes so innocent I mean I could see how sweet your soul is. The way your cheeks tighten when you try not to smile or seem weird on pics is so cute gosh JSISKAAKAKAKAKA so cutee I find it so adorable so beautiful gosh. I love you
+32. The way your hair glow when lights on them gosh I wanna look at you in sun, your hair will absolutely melt me. I love you
+33. The way your lip skin folds when your pout for a kiss awwww I swear I remember every part of it I would kiss you forever my love. I love you 
+34. The way your shines eyes, oh gosh so i even have to say anything? The green in your eyes pops out so much it makes me high, high in love obv dummy i love you so much. I love you
+35. the way you try to be smartass with me sometimes, it's so funny Im actually smiling writing this dummy you can't be a smartass with me mf. I love you
+36. The way your dummy ass tries, you try and I find it so cute and I admire you for it, you'll be able to open up yourself to me someday completely and let go off the past that has been holding you off. I love you
+37. I love your feets UHJEMEMEMEMDKSZK gosh that mf mortal enemy I will fight her your feets only belongs to mine. I love you 
+38. I love the way your hand makes a soft fist i saw it on a picture and gosh it was like panda you're a panda dummy. I love you
+39. I love the shape of you, every curve, every transition between your skin gosh it's all so beautiful, you're ethereal. I love you
+40. Your heart, I love it every bit of it. Gosh how were you even made? Every single part of you, is beautiful without even hearing your heartbeat I just know your heartbeats are a melody to my ears, your heart is the best part of you it's who you truly are, and I love who you are, every bit of it. I adore. You're such a kind, sweet and an amazing girl even without me, sweetheart. Keep being this amazing I'll forever love you. I hope you'll know someday how amazing and beautiful you truly are, you're blinded by others judgement, but once you truly choose to let go of stupid people and thoughts you'd know how beautiful you truly are. You're just like a beautiful butterfly who fails to see her own gorgoues wings. You'll know baby just love yourself, I'll love you so much you'll start to love yourself, you'll start to see your true self baby, I'll guide you through it just take my hand and let me lead the way, all through your life I'll be by your side. Hihihihih remember??? Okay very cute. I love you so much
+
+
+
+
+as for the final say-
+I adore your existence, I admire your personality.
+I find your whole self as an ethereal,
+Even that would be less to explain your true self,
+You're an angel, not just angel you're a goddess,
+My goddess. I'm an atheist but gosh the way I worship you. 
+Calling you an angel would be disrespect to you, for you are way too gorgeous even angels would be jealous of your beauty. 
+For my last words I want you to know
+
+You've done so much for me, I hope you know now that you're not useless. You deserve the entirety of the universe and that would too be less.
+
+Don't ever say you're useless, my love.
+You're never too annoying, never dumb, never stupid. You're you, and I love you.
+Always be your true self to me.
+I choosed to love true you not the person you try to be.
+
+I adore you dori.
+
+-your honey.
+
+
+/* ── Lily SVG ─────────────────────────────────────────────── */
+const LILY_SVG = `<svg viewBox="0 0 80 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+  <path d="M40 110 Q40 70 40 30" stroke="#e8a4b8" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="40" cy="30" rx="6" ry="22" fill="#f4c2d0" fill-opacity=".7" transform="rotate(-25 40 30)"/>
+  <ellipse cx="40" cy="30" rx="6" ry="22" fill="#f4c2d0" fill-opacity=".7" transform="rotate(25 40 30)"/>
+  <ellipse cx="40" cy="30" rx="5" ry="20" fill="#fad4e0" fill-opacity=".8" transform="rotate(-55 40 30)"/>
+  <ellipse cx="40" cy="30" rx="5" ry="20" fill="#fad4e0" fill-opacity=".8" transform="rotate(55 40 30)"/>
+  <ellipse cx="40" cy="28" rx="5" ry="20" fill="#fce8f0" fill-opacity=".8"/>
+  <circle cx="40" cy="28" r="4" fill="#f7b8ce" fill-opacity=".9"/>
+  <path d="M30 75 Q20 65 22 58" stroke="#e8a4b8" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <ellipse cx="20" cy="54" rx="4" ry="12" fill="#e8c4d0" fill-opacity=".6" transform="rotate(-40 20 54)"/>
+  <path d="M50 80 Q62 68 60 60" stroke="#e8a4b8" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <ellipse cx="62" cy="56" rx="4" ry="12" fill="#e8c4d0" fill-opacity=".6" transform="rotate(40 62 56)"/>
+</svg>`;
+
+document.querySelectorAll('.lily-decor').forEach(el => { el.innerHTML = LILY_SVG; });
+
+/* ── Heart characters ─────────────────────────────────────── */
+const HEART_CHARS = ['♡','♥','❤','💗','💕','💓','🤍'];
+
+function spawnHearts(container, count) {
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('span');
+    el.className = 'floating-heart';
+    el.textContent = HEART_CHARS[Math.floor(Math.random() * HEART_CHARS.length)];
+    el.setAttribute('aria-hidden', 'true');
+    const dur     = (Math.random() * 8 + 10).toFixed(1);
+    const drift   = (Math.random() * 4 + 3).toFixed(1);
+    const delay   = (Math.random() * 8).toFixed(1);
+    const size    = (Math.random() * 0.7 + 0.55).toFixed(2);
+    el.style.left = (Math.random() * 96 + 2) + '%';
+    el.style.fontSize = size + 'rem';
+    el.style.animationDuration = dur + 's, ' + drift + 's';
+    el.style.animationDelay = delay + 's';
+    container.appendChild(el);
+  }
+}
+
+spawnHearts(document.getElementById('cover-hearts'), 55);
+spawnHearts(document.getElementById('book-hearts'), 16);
+
+/* ── Photo upload ─────────────────────────────────────────── */
+function handlePhotoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const wrap = document.getElementById('cover-photo-wrap');
+  wrap.querySelector('.photo-slot-hint').style.display = 'none';
+  let img = wrap.querySelector('img');
+  if (!img) { img = document.createElement('img'); wrap.appendChild(img); }
+  img.src = url;
+  img.alt = '';
+}
+
+/* ── Phase management ─────────────────────────────────────── */
+function showPhase(id) {
+  document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ── Read button ──────────────────────────────────────────── */
+function handleRead() {
+  const audio = document.getElementById('bg-audio');
+  if (audio) { audio.volume = 1; audio.play().catch(() => {}); }
+  showPhase('phase-popup');
+  startPopup();
+}
+
+/* ── Popup ────────────────────────────────────────────────── */
+const MINI_HEARTS = ['♡','♥','♡','💕','♡','♥'];
+
+function startPopup() {
+  const popup  = document.getElementById('phase-popup');
+  const hCont  = document.getElementById('popup-hearts');
+  popup.style.opacity = '1';
+
+  const interval = setInterval(() => {
+    const el = document.createElement('span');
+    el.className = 'mini-heart-fx';
+    el.textContent = MINI_HEARTS[Math.floor(Math.random() * MINI_HEARTS.length)];
+    el.setAttribute('aria-hidden', 'true');
+    el.style.position = 'absolute';
+    el.style.left = (Math.random() * 80 + 10) + '%';
+    el.style.top  = (Math.random() * 80 + 10) + '%';
+    el.style.fontSize = (Math.random() * 0.7 + 0.6).toFixed(2) + 'rem';
+    el.style.color = 'rgba(220,100,130,.4)';
+    el.style.pointerEvents = 'none';
+    el.style.userSelect = 'none';
+    hCont.appendChild(el);
+    if (hCont.children.length > 14) hCont.removeChild(hCont.firstChild);
+  }, 380);
+
+  setTimeout(() => { popup.style.opacity = '0'; }, 3200);
+  setTimeout(() => {
+    clearInterval(interval);
+    showPhase('phase-book');
+    initBook();
+  }, 3900);
+}
+
+/* ── Book System ───────────────────────────────────────────── */
+const STICKERS = [
+  '🌸','💗','🌷','💝','🦋','🌺','✨','💫','🩷','🫶',
+  '💕','🌹','🌼','💖','🎀','🌙','⭐','🕊️','🌻','💐',
+  '🍓','🫐','🌈','🦢','🐚','🪷','💞','🌛','🍬','🎵',
+  '🪸','🌊','🍃','🌿','🫧','💎','🪽','🧸','🪄','💌',
+];
+
+const STORAGE_KEY = 'love-book-stickers';
+
+let pages        = [];
+let pageIndex    = 0;
+let stickerData  = [];
+let placingEmoji = null;
+let draggingId   = null;
+let dragOffset   = { x: 0, y: 0 };
+let bookInited   = false;
+
+function getPages(text) {
+  const trimmed = text.trim();
+  const result  = [];
+  let i = 0;
+  while (i < trimmed.length && result.length * CHARS_PER_PAGE < 100000) {
+    let end = i + CHARS_PER_PAGE;
+    if (end < trimmed.length) {
+      const bp = trimmed.lastIndexOf('\n', end);
+      if (bp > i + 100) { end = bp; }
+      else {
+        const sp = trimmed.lastIndexOf(' ', end);
+        if (sp > i + 100) end = sp;
+      }
+    }
+    result.push(trimmed.slice(i, end).trim());
+    i = end;
+  }
+  return result;
+}
+
+function loadStickers() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+}
+function saveStickers() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stickerData)); } catch {}
+}
+
+function initBook() {
+  if (bookInited) return;
+  bookInited = true;
+
+  pages = getPages(LOVE_LETTER);
+  stickerData = loadStickers();
+
+  const grid = document.getElementById('sticker-grid');
+  STICKERS.forEach(emoji => {
+    const btn = document.createElement('button');
+    btn.className = 'sticker-btn';
+    btn.textContent = emoji;
+    btn.title = 'Place ' + emoji;
+    btn.onclick = () => { startPlacing(emoji); };
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('book-card').addEventListener('click', handleCardClick);
+
+  document.addEventListener('mousemove', onDragMove);
+  document.addEventListener('mouseup',   onDragEnd);
+  document.addEventListener('touchmove', onTouchMove, { passive: false });
+  document.addEventListener('touchend',  onDragEnd);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') goPage(1);
+    if (e.key === 'ArrowLeft')  goPage(-1);
+  });
+
+  renderPage();
+  renderDots();
+}
+
+function renderPage(direction) {
+  const content = document.getElementById('page-content');
+  content.className = '';
+  void content.offsetWidth; // reflow trigger
+  if (direction === 1)  content.className = 'page-enter-right';
+  if (direction === -1) content.className = 'page-enter-left';
+
+  const text = pages[pageIndex] || '';
+  const paras = text.split(/\n\n+/).filter(Boolean);
+  content.innerHTML = paras.map(p =>
+    `<p style="font-family:'Lora',Georgia,serif;font-size:clamp(.85rem,2.2vw,1.02rem);color:#7a3d52;line-height:1.85;margin:0 0 1.1em;letter-spacing:.01em;">${escHtml(p.trim())}</p>`
+  ).join('');
+
+  document.getElementById('page-counter').textContent = (pageIndex + 1) + ' / ' + pages.length;
+  document.getElementById('btn-prev').disabled = pageIndex === 0;
+  document.getElementById('btn-next').disabled = pageIndex === pages.length - 1;
+
+  renderStickers();
+  renderDots();
+}
+
+function renderStickers() {
+  const layer = document.getElementById('sticker-layer');
+  layer.innerHTML = '';
+  layer.style.pointerEvents = 'none';
+
+  stickerData.filter(s => s.pageIndex === pageIndex).forEach(s => {
+    const el = document.createElement('span');
+    el.className = 'sticker-item';
+    el.textContent = s.emoji;
+    el.dataset.id = s.id;
+    el.style.left      = s.x + '%';
+    el.style.top       = s.y + '%';
+    el.style.transform = `translate(-50%,-50%) rotate(${s.rotate}deg)`;
+    el.style.pointerEvents = 'auto';
+
+    el.addEventListener('mousedown',   e => startDrag(e, s.id));
+    el.addEventListener('touchstart',  e => startTouchDrag(e, s.id), { passive: false });
+    el.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); removeSticker(s.id); });
+    layer.appendChild(el);
+  });
+}
+
+function renderDots() {
+  const wrap = document.getElementById('progress-dots');
+  wrap.innerHTML = '';
+  pages.forEach((_, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'prog-dot' + (i === pageIndex ? ' active' : '');
+    btn.setAttribute('aria-label', 'Page ' + (i + 1));
+    btn.onclick = () => { const dir = i > pageIndex ? 1 : -1; pageIndex = i; renderPage(dir); };
+    wrap.appendChild(btn);
+  });
+}
+
+function goPage(dir) {
+  const next = pageIndex + dir;
+  if (next < 0 || next >= pages.length) return;
+  pageIndex = next;
+  renderPage(dir);
+}
+
+/* ── Sticker placement ───────────────────────────────────────── */
+function startPlacing(emoji) {
+  placingEmoji = emoji;
+  document.getElementById('sticker-picker').classList.remove('open');
+  document.getElementById('btn-sticker').style.background = 'rgba(255,140,170,.35)';
+  const hint = document.getElementById('placing-hint');
+  hint.textContent = emoji + ' tap anywhere on the page to place ✦';
+  hint.style.display = 'block';
+  document.getElementById('book-card').style.cursor = 'crosshair';
+}
+
+function handleCardClick(e) {
+  if (!placingEmoji) return;
+  const card = document.getElementById('book-card');
+  const rect  = card.getBoundingClientRect();
+  const x = ((e.clientX - rect.left) / rect.width)  * 100;
+  const y = ((e.clientY - rect.top)  / rect.height) * 100;
+  const newS = {
+    id:        Date.now() + '-' + Math.random(),
+    emoji:     placingEmoji,
+    x, y,
+    rotate:    Math.random() * 30 - 15,
+    pageIndex,
+  };
+  stickerData.push(newS);
+  saveStickers();
+  placingEmoji = null;
+  document.getElementById('placing-hint').style.display = 'none';
+  document.getElementById('btn-sticker').style.background = 'rgba(255,220,230,.5)';
+  document.getElementById('book-card').style.cursor = 'default';
+  renderStickers();
+}
+
+function removeSticker(id) {
+  stickerData = stickerData.filter(s => s.id !== id);
+  saveStickers();
+  renderStickers();
+}
+
+/* ── Drag (mouse) ────────────────────────────────────────────── */
+function startDrag(e, id) {
+  if (placingEmoji) return;
+  e.stopPropagation();
+  draggingId = id;
+  const el   = e.currentTarget;
+  const rect = el.getBoundingClientRect();
+  dragOffset = { x: e.clientX - rect.left - rect.width/2, y: e.clientY - rect.top - rect.height/2 };
+  el.classList.add('dragging');
+}
+
+function onDragMove(e) {
+  if (!draggingId) return;
+  const card = document.getElementById('book-card');
+  const rect = card.getBoundingClientRect();
+  const x = Math.max(2, Math.min(98, ((e.clientX - dragOffset.x - rect.left) / rect.width)  * 100));
+  const y = Math.max(2, Math.min(98, ((e.clientY - dragOffset.y - rect.top)  / rect.height) * 100));
+  const s = stickerData.find(s => s.id === draggingId);
+  if (s) { s.x = x; s.y = y; }
+  const el = document.querySelector(`.sticker-item[data-id="${draggingId}"]`);
+  if (el) { el.style.left = x + '%'; el.style.top = y + '%'; }
+}
+
+function onDragEnd() {
+  if (!draggingId) return;
+  document.querySelectorAll('.sticker-item').forEach(el => el.classList.remove('dragging'));
+  saveStickers();
+  draggingId = null;
+}
+
+/* ── Drag (touch) ────────────────────────────────────────────── */
+function startTouchDrag(e, id) {
+  if (placingEmoji) return;
+  e.preventDefault();
+  e.stopPropagation();
+  draggingId = id;
+  const t    = e.touches[0];
+  const el   = e.currentTarget;
+  const rect = el.getBoundingClientRect();
+  dragOffset = { x: t.clientX - rect.left - rect.width/2, y: t.clientY - rect.top - rect.height/2 };
+}
+
+function onTouchMove(e) {
+  if (!draggingId) return;
+  e.preventDefault();
+  const t    = e.touches[0];
+  const card = document.getElementById('book-card');
+  const rect = card.getBoundingClientRect();
+  const x = Math.max(2, Math.min(98, ((t.clientX - dragOffset.x - rect.left) / rect.width)  * 100));
+  const y = Math.max(2, Math.min(98, ((t.clientY - dragOffset.y - rect.top)  / rect.height) * 100));
+  const s = stickerData.find(s => s.id === draggingId);
+  if (s) { s.x = x; s.y = y; }
+  const el = document.querySelector(`.sticker-item[data-id="${draggingId}"]`);
+  if (el) { el.style.left = x + '%'; el.style.top = y + '%'; }
+}
+
+/* ── Sticker picker toggle ───────────────────────────────────── */
+function togglePicker() {
+  const picker = document.getElementById('sticker-picker');
+  picker.classList.toggle('open');
+  placingEmoji = null;
+  document.getElementById('placing-hint').style.display = 'none';
+  document.getElementById('book-card').style.cursor = 'default';
+  document.getElementById('btn-sticker').style.background =
+    picker.classList.contains('open') ? 'rgba(255,140,170,.35)' : 'rgba(255,220,230,.5)';
+}
+
+/* ── Util ────────────────────────────────────────────────────── */
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
