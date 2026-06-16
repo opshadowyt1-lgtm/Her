@@ -150,32 +150,92 @@
     <div id="sticker-grid"></div>
   </div>
 
-  <!-- Inject auto-run command right into the initialization chain -->
-  <script>
-    // Automatically trigger the book generation engine as soon as elements load
-    window.addEventListener('DOMContentLoaded', () => {
-      if (typeof initBook === 'function') {
-        initBook();
-      }
-      
-      // Infinite light background hearts generator
-      const container = document.getElementById('book-hearts');
-      const hearts = ['🎈', '🤍', '🌸', '✨', '💖', '💝', '💕'];
-      setInterval(() => {
-        const el = document.createElement('span');
-        el.className = 'floating-heart';
-        el.textContent = hearts[Math.floor(Math.random() * hearts.length)];
-        el.style.left = Math.random() * 95 + '%';
-        el.style.fontSize = (Math.random() * 0.6 + 0.6) + 'rem';
-        el.style.styleDelay = Math.random() * 2 + 's';
-        el.style.animationDuration = (Math.random() * 5 + 6) + 's';
-        el.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
-        if(container) { container.appendChild(el); }
-        setTimeout(() => el.remove(), 11000);
-      }, 450);
-    });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>For Her</title>
+  <!-- Force an invisible background audio player that loads music instantly -->
+  <audio id="bg-audio" src="music.mp3" loop preload="auto" style="display:none;"></audio>
+  <style>
+    /* Smooth global reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { width: 100%; height: 100%; overflow: hidden; font-family: sans-serif; }
     
-  <script>
+    /* The active display wrapper */
+    .phase { display: none; width: 100%; height: 100vh; }
+    .phase.active { display: flex; }
+
+    /* Book UI Layout */
+    #phase-book {
+      min-height: 100dvh; width: 100%;
+      background: linear-gradient(140deg, #fff5f7 0%, #ffe5ef 40%, #fff0f5 100%);
+      flex-direction: column; align-items: center; justify-content: center;
+      padding: 1.5rem 1rem 2rem; position: relative; overflow: hidden;
+    }
+    #book-hearts { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+    .lily-decor { position: absolute; width: 40px; height: 40px; opacity: 0.3; z-index: 1; }
+    
+    /* Book Container Elements */
+    .book-container { position: relative; z-index: 2; width: 100%; max-width: 720px; display: flex; flex-direction: column; gap: 1.2rem; }
+    .book-header { display: flex; align-items: center; justify-content: space-between; padding-inline: .25rem; font-family: 'Playfair Display', serif; font-style: italic; color: #c47085; }
+    .book-border { border-radius: 1.5rem; padding: clamp(1.4rem, 4vw, 2.4rem) clamp(1.2rem, 4vw, 2.2rem); background: rgba(255, 255, 255, .94); box-shadow: 0 8px 48px rgba(255, 100, 140, .15); border: 1.5px solid rgba(255, 182, 195, .5); min-height: 420px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+    #page-content { position: relative; z-index: 1; color: #7a3d52; line-height: 1.85; font-family: 'Lora', Georgia, serif; font-size: clamp(.85rem, 2.2vw, 1.02rem); }
+    #sticker-layer { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+    
+    /* Navigation UI Buttons */
+    .nav-row { display: flex; align-items: center; justify-content: center; gap: 1.2rem; z-index: 2; }
+    .nav-btn { padding: 0.6rem 1.5rem; border-radius: 2rem; border: 1.5px solid rgba(255, 140, 170, .35); background: #fff; color: #c47085; font-weight: bold; cursor: pointer; transition: all 0.2s ease; }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    
+    /* Dots and Panels */
+    #progress-dots { display: flex; justify-content: center; gap: .35rem; flex-wrap: wrap; margin-top: 0.5rem; z-index: 2; }
+    .prog-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 140, 170, .3); }
+    .prog-dot.active { background: #c47085; transform: scale(1.2); }
+    #sticker-picker { display: none; }
+  </style>
+</head>
+<body onclick="const aud = document.getElementById('bg-audio'); if(aud && aud.paused){ aud.volume = 1; aud.play().catch(()=>{}); }">
+
+  <!-- Main Viewport: The Book opens instantly -->
+  <div id="phase-book" class="phase active">
+    <div id="book-hearts" aria-hidden="true"></div>
+    
+    <!-- Decorative Layout Elements -->
+    <div class="lily-decor" style="left:2%; bottom:10%;"></div>
+    <div class="lily-decor" style="right:2%; bottom:7%;"></div>
+    <div class="lily-decor" style="left:6%; top:8%;"></div>
+    <div class="lily-decor" style="right:6%; top:12%;"></div>
+
+    <div class="book-container">
+      <div class="book-header">
+        <span>A glimpse of us</span>
+        <span id="page-counter">1 / 1</span>
+      </div>
+
+      <div class="book-border">
+        <div id="page-content"></div>
+        <div id="sticker-layer"></div>
+      </div>
+
+      <!-- Navigation Row Layout -->
+      <div class="nav-row">
+        <button id="btn-prev" class="nav-btn" onclick="goPage(-1)">← Back</button>
+        <button id="btn-sticker" class="nav-btn" style="background:rgba(255,220,230,.5);" onclick="togglePicker()">✨ Sticker</button>
+        <button id="btn-next" class="nav-btn" onclick="goPage(1)">Next →</button>
+      </div>
+
+      <div id="progress-dots"></div>
+    </div>
+  </div>
+
+  <!-- Hidden legacy elements to keep the background JavaScript systems stable -->
+  <div id="phase-popup" style="display: none;"></div>
+  <div id="sticker-picker">
+    <div id="sticker-grid"></div>
+  </div>
+  
     // System configuration settings
     const CHARS_PER_PAGE = 1000;
 
