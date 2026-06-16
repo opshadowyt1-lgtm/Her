@@ -237,7 +237,7 @@
 </head>
 <body>
 
-<audio id="bg-audio" src="YOUR_SONG_FILE.mp3" loop preload="auto" style="display:none"></audio>
+<audio id="bg-audio" src="music.mp3" loop preload="auto" style="display:none"></audio>
 
 <div id="placing-hint"></div>
 
@@ -614,10 +614,14 @@ function showPhase(id) {
 /* ── Read button ──────────────────────────────────────────── */
 function handleRead() {
   const audio = document.getElementById('bg-audio');
-  if (audio) { audio.volume = 1; audio.play().catch(() => {}); }
+  if (audio) { 
+    audio.volume = 1; 
+    audio.play().catch((err) => console.log("Audio play blocked or failed:", err)); 
+  }
   showPhase('phase-popup');
   startPopup();
-}
+  }
+  
 
 /* ── Popup ────────────────────────────────────────────────── */
 const MINI_HEARTS = ['♡','♥','♡','💕','♡','♥'];
