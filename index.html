@@ -271,7 +271,8 @@
       </div>
     </div>
 
-    <button class="read-btn" onclick="handleRead()">Read ♡</button>
+    <button class="read-btn" onclick="showPhase('phase-popup'); startPopup(); const audio = document.getElementById('bg-audio'); if(audio){audio.volume = 1; audio.play().catch(()=>{});}">Read ♡</button>
+    
   </div>
 </div>
 
